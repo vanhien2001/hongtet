@@ -18,7 +18,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
   
   return (
     <div 
-      className="group relative flex-shrink-0 w-80 md:w-96 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer overflow-hidden border border-gray-100 flex flex-col h-[450px]"
+      className="group relative flex-shrink-0 w-80 md:w-96 bg-white rounded-2xl shadow-[0_4px_12px_rgba(249,115,22,0.12)] hover:shadow-[0_8px_24px_rgba(249,115,22,0.2)] transition-all duration-300 transform hover:-translate-y-2 cursor-pointer overflow-hidden border-2 border-gray-100 flex flex-col h-[450px]"
       onClick={() => onClick(event)}
     >
       {/* 1. Visual Header (45%) */}

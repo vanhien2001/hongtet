@@ -26,16 +26,16 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
       </div>
       
       <nav className="sticky top-4 z-40 mx-auto max-w-md w-full px-4 mb-8">
-        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-full p-1.5 flex justify-between border border-gray-100">
+        <div className="bg-white shadow-lg rounded-full p-1.5 flex justify-between border-2 border-gray-200">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`
-              flex-1 py-2.5 px-4 rounded-full text-sm font-medium transition-all duration-300
+              flex-1 py-2.5 px-4 rounded-full text-sm font-semibold transition-all duration-300
               ${activeTab === tab.id 
                 ? 'bg-tetRed text-white shadow-md transform scale-105' 
-                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}
+                : 'text-tetRed hover:text-white hover:bg-tetRed/10'}
             `}
           >
             {tab.label}

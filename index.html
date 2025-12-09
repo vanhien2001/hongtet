@@ -19,10 +19,11 @@
               serif: ['Playfair Display', 'serif'],
             },
             colors: {
-              tetRed: '#D9381E',
-              tetGold: '#F8D849',
+              tetRed: '#B91C1C',
+              tetGold: '#D97706',
               tetDark: '#1A1A1A',
-              cream: '#FCFBF9',
+              cream: '#FFFDF5',
+              warmCream: '#F9F5F0',
             },
             animation: {
               'float': 'float 6s ease-in-out infinite',
@@ -74,6 +75,33 @@
       .animation-delay-4000 {
         animation-delay: 4s;
       }
+
+      /* Subtle Tết Pattern Background */
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        opacity: 0.05;
+        background-image: 
+          radial-gradient(circle at 20% 30%, rgba(185, 28, 28, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 80% 70%, rgba(217, 119, 6, 0.1) 0%, transparent 50%);
+        background-size: 200% 200%;
+        animation: subtleMove 20s ease-in-out infinite;
+      }
+
+      @keyframes subtleMove {
+        0%, 100% { background-position: 0% 0%; }
+        50% { background-position: 100% 100%; }
+      }
+
+      /* Peach Blossom Pattern - subtle decoration */
+      .peach-pattern {
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23B91C1C' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      }
     </style>
   <script type="importmap">
 {
@@ -87,7 +115,7 @@
 </script>
 <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-cream text-gray-800 antialiased selection:bg-tetRed selection:text-white">
+  <body class="bg-cream peach-pattern text-gray-800 antialiased selection:bg-tetRed selection:text-white">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

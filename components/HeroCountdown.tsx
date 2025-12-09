@@ -48,7 +48,7 @@ const HeroCountdown: React.FC = () => {
 
       <div className="relative z-10 text-center px-4">
         <div className="inline-block bg-white/20 backdrop-blur-sm rounded-full px-4 py-1 text-xs md:text-sm font-bold text-white uppercase tracking-wider mb-6 border border-white/30">
-          Sự kiện sắp tới
+          Sắp tết rồi
         </div>
         <h1 className="text-4xl md:text-6xl font-serif font-bold text-white mb-4 drop-shadow-md">
           Tết Nguyên Đán 2026
