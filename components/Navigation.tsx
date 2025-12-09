@@ -1,0 +1,50 @@
+import React from 'react';
+import { Tab } from '../types';
+
+interface NavigationProps {
+  activeTab: Tab;
+  onTabChange: (tab: Tab) => void;
+}
+
+const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
+  const tabs = [
+    { id: Tab.HOME, label: 'Trang Chủ' },
+    { id: Tab.FOOD, label: 'Món Ăn Tết' },
+    { id: Tab.ABOUT, label: 'Giới Thiệu' },
+  ];
+
+  return (
+    <div className="relative">
+      {/* Vietnam Flag - Absolute positioned within container */}
+      <div className="absolute left-0 top-0 ml-4">
+        <img 
+          src="/flag-vn.svg" 
+          alt="Cờ Việt Nam" 
+          className="w-14 h-9 shadow-lg rounded-sm border border-gray-200 hover:scale-110 transition-transform duration-300"
+          title="Việt Nam"
+        />
+      </div>
+      
+      <nav className="sticky top-4 z-40 mx-auto max-w-md w-full px-4 mb-8">
+        <div className="bg-white/90 backdrop-blur-md shadow-lg rounded-full p-1.5 flex justify-between border border-gray-100">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => onTabChange(tab.id)}
+            className={`
+              flex-1 py-2.5 px-4 rounded-full text-sm font-medium transition-all duration-300
+              ${activeTab === tab.id 
+                ? 'bg-tetRed text-white shadow-md transform scale-105' 
+                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'}
+            `}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+    </nav>
+    </div>
+  );
+};
+
+export default Navigation;

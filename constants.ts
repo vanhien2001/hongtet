@@ -1,0 +1,336 @@
+import { Event, Food } from './types';
+
+// Helper to get current year's date or next year if passed
+const getNextDate = (month: number, day: number) => {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const date = new Date(currentYear, month - 1, day);
+  if (date.getTime() < now.getTime()) {
+    date.setFullYear(currentYear + 1);
+  }
+  return date.toISOString();
+};
+
+export const TET_DATE = "2026-02-17T00:00:00"; // Fixed for Tet 2026 for demo purposes or dynamic logic
+
+// Q&A cho Tết Nguyên Đán - sự kiện chính
+export const TET_QA = [
+  { question: "Tết Nguyên Đán có ý nghĩa gì?", answer: "Tết Nguyên Đán (Nguyên là đầu, Đán là sáng/ngày) là ngày đầu tiên của năm mới âm lịch. Đây là dịp để người Việt sum họp gia đình, tưởng nhớ tổ tiên, cầu chúc năm mới bình an, thịnh vượng. Tết còn là thời điểm để gác lại mọi ưu phiền năm cũ, bắt đầu một năm mới với tinh thần lạc quan." },
+  { question: "Phong tục Tết có gì đặc biệt?", answer: "Xông đất (người đầu tiên vào nhà năm mới), mừng tuổi (lì xì), chúc Tết, thăm họ hàng, đi chùa cầu may, chơi các trò chơi dân gian như đánh cờ, đánh bài. Mọi người thường mặc áo mới, trang trí nhà cửa với hoa đào, hoa mai, câu đối đỏ." },
+  { question: "Chuẩn bị Tết như thế nào?", answer: "Dọn dẹp nhà cửa (tống cựu nghinh tân), mua sắm đồ Tết, nấu bánh chưng/bánh tét, chuẩn bị mâm cỗ, mua hoa, viết câu đối. Nhiều gia đình còn làm mứt, giò chả, nem công để cúng và đãi khách. Người làm ăn xa thường về quê sum họp gia đình." },
+  { question: "Mâm cỗ Tết có gì?", answer: "Miền Bắc: Bánh chưng, giò chả, thịt luộc, xôi gấc, dưa hành, củ kiệu. Miền Nam: Bánh tét, thịt kho tàu/thịt kho hột vịt, canh khổ qua, dưa món. Không thể thiếu là khay mứt, bánh kẹo đãi khách và trái cây ngũ quả." },
+  { question: "Những điều kiêng kỵ ngày Tết?", answer: "Không quét nhà ngày mùng 1 (sợ quét mất tài lộc), không nói những lời xui xẻo, không đòi nợ, không đập vỡ đồ, không cãi vã. Người đi xông đất phải được chọn cẩn thận (tuổi hợp, tính tình tốt). Ăn mặc lịch sự, không mặc đồ đen trắng." },
+  { question: "Tết kéo dài bao lâu?", answer: "Chính thức 3 ngày (mùng 1, 2, 3) nhưng không khí Tết thường kéo dài cả tháng Giêng, đến hết Rằm tháng Giêng (Tết Nguyên Tiêu). Thời gian chuẩn bị từ 23 tháng Chạp (Tết ông Táo) đến 30 Tết (đêm giao thừa)." },
+  { question: "Ý nghĩa xông đất đầu năm?", answer: "Xông đất là phong tục đón người đầu tiên vào nhà trong năm mới. Người xông đất phải có tuổi hợp, tính cách tốt, sự nghiệp thành đạt để mang lại may mắn, tài lộc cho gia chủ. Thường được mời trước và tặng lì xì." },
+  { question: "Tại sao phải lì xì?", answer: "Lì xì (tiền mừng tuổi) là cách người lớn tuổi ban phước lành, chúc sức khỏe cho trẻ nhỏ và người nhỏ tuổi hơn. Bao lì xì đỏ tượng trưng may mắn, tiền bên trong thể hiện lời chúc năm mới phát tài, thịnh vượng." },
+  { question: "Hoa Tết có ý nghĩa gì?", answer: "Miền Bắc: Hoa đào (màu hồng) tượng trưng sự ấm áp, may mắn. Miền Nam: Hoa mai (màu vàng) biểu tượng cho sự giàu sang, phú quý. Hoa cúc: trường thọ. Hoa lan: sang trọng. Hoa đồng tiền: tiền vàng đầy nhà." },
+  { question: "Câu đối Tết viết gì?", answer: "Câu đối đỏ (hoặc vàng) thường viết chữ Hán hoặc chữ Nôm với nội dung chúc phúc như: Vạn sự như ý, Tứ hải thái bình, Xuân đến phúc lộc đến, An khang thịnh vượng. Dán hai bên cửa chính để đón tài lộc vào nhà." },
+  { question: "Tục cúng giao thừa là gì?", answer: "Giao thừa (đêm 30 Tết) là thời khắc chuyển giao giữa năm cũ và năm mới. Gia đình cúng tổ tiên, thần linh để tạ ơn năm qua và cầu an năm mới. Mâm cúng có bánh chưng/tét, thịt gà, xôi, trái cây, rượu, hương đèn." },
+  { question: "Tục đi chùa đầu năm?", answer: "Người Việt thường đi chùa trong ba ngày Tết để cầu an, lễ Phật, xin lộc đầu năm (cây lộc - cành cây tươi tốt từ chùa). Nhiều người còn bái sám, phóng sinh, bố thí để cầu may mắn và công đức cho năm mới." },
+  { question: "Trò chơi dân gian nào phổ biến?", answer: "Đánh cờ, đánh bài (tiến lên, phỏm), bầu cua, tò te (xúc xắc), kéo co, nhảy dây, chơi ô ăn quan, đánh đáo, đập niêu, bịt mắt bắt dê. Người lớn thường đánh bài để giải trí, còn trẻ em có nhiều trò chơi ngoài trời." },
+  { question: "Ăn chay ngày mùng 1?", answer: "Nhiều gia đình ăn chay trong ngày mùng 1 Tết để cầu bình an, thanh tịnh. Món chay phổ biến: rau củ luộc, đậu hũ, măng, nấm, canh rau, xôi chay. Một số nhà Phật tử ăn chay cả 3 ngày Tết hoặc cả tháng Giêng." },
+  { question: "Tục mở hàng đầu năm?", answer: "Các cửa hàng, công ty thường chọn giờ tốt để khai trương, mở hàng đầu năm với mong muốn kinh doanh thuận lợi. Khách hàng đầu tiên được tặng quà hoặc giảm giá, vì tin rằng sẽ mang lại may mắn cả năm." },
+  { question: "Quần áo màu gì ngày Tết?", answer: "Ưu tiên màu đỏ (may mắn, tài lộc), vàng (phú quý), hồng (hạnh phúc). Tránh màu đen, trắng (tang tóc). Mọi người thường mua sắm quần áo mới để mặc trong dịp Tết, thể hiện sự đổi mới, may mắn." },
+  { question: "Tục uống rượu Tết?", answer: "Rượu trong mâm cỗ Tết không thể thiếu: rượu nếp, rượu thuốc bắc để chúc sức khỏe. Người lớn tuổi uống rượu và chúc nhau lời an khang, thịnh vượng. Tuy nhiên cần uống có văn hóa, tránh say xỉn gây mất trật tự." },
+  { question: "Thăm họ hàng theo thứ tự nào?", answer: "Mùng 1: Thăm ông bà nội, họ hàng bên nội. Mùng 2: Thăm ông bà ngoại, họ hàng bên ngoại. Mùng 3: Thăm thầy cô, bạn bè. Đây là truyền thống để thể hiện lòng hiếu thảo và tình cảm với người thân." },
+  { question: "Món quà biếu Tết nào ý nghĩa?", answer: "Bánh kẹo, mứt Tết, rượu ngon, trà cao cấp, giỏ hoa quả, đặc sản vùng miền. Với người thân: lì xì, quần áo mới. Với thầy cô, sếp: hoa tươi, quà tặng thanh lịch. Tránh tặng đồng hồ (ý nghĩa chia li), dao kéo (cắt đứt tình nghĩa)." },
+  { question: "Tục lấy lộc đầu năm?", answer: "Lấy lộc: xin một vật nhỏ (cành cây, củ gừng, lá bồ đề...) từ chùa, đền để về nhà làm vật phẩm phong thủy, cầu may. Mua lộc: mua sắm đồ đầu năm với hy vọng mang tài lộc vào nhà. Cả hai đều thể hiện mong muốn năm mới sung túc." }
+];
+
+export const EVENTS: Event[] = [
+  {
+    id: 'giang-sinh',
+    title: 'Lễ Giáng Sinh',
+    date: getNextDate(12, 25),
+    category: 'Tôn giáo',
+    description: 'Khoảnh khắc an lành và ấm áp cuối năm.',
+    fullDescription: 'Lễ Giáng Sinh, còn được gọi là Noel, là ngày lễ kỷ niệm Chúa Giêsu sinh ra đời.',
+    image: '/images/events/giang-sinh.png',
+    qa: [
+      { question: "Giáng Sinh có nguồn gốc từ đâu?", answer: "Giáng Sinh (Christmas) là ngày kỷ niệm Chúa Giêsu ra đời tại Bethlehem. Mặc dù không có bằng chứng lịch sử chính xác về ngày sinh, Giáo hội đã chọn 25/12 từ thế kỷ thứ 4 để kỷ niệm sự kiện thiêng liêng này." },
+      { question: "Ông già Noel là ai?", answer: "Nguồn gốc từ Thánh Nicholas (270-343), vị Giám mục thành Myra (Thổ Nhĩ Kỳ ngày nay) nổi tiếng với lòng nhân từ, thường cho quà trẻ em nghèo. Hình tượng ông già Noel hiện đại với bộ đồ đỏ trắng được phổ biến từ thế kỷ 19-20." },
+      { question: "Cây thông Noel biểu tượng gì?", answer: "Cây thông xanh quanh năm tượng trưng cho sự sống bất diệt và hy vọng. Tục trang trí cây thông bắt nguồn từ Đức thế kỷ 16, sau đó lan rộng khắp thế giới. Ngôi sao trên đỉnh tượng trưng ngôi sao dẫn đường cho 3 vị Đông phương đến chuồng bò." },
+      { question: "Noel ở Việt Nam như thế nào?", answer: "Tại Việt Nam, Giáng Sinh được cộng đồng Công giáo (khoảng 7 triệu người) ăn mừng long trọng với thánh lễ nửa đêm, trang trí hang đá, hát mừng Chúa giáng sinh. Nhiều địa phương như Bùi Chu, Phát Diệm có lễ hội hoành tráng. Giới trẻ cũng vui chơi, tặng quà, trang trí nhà cửa theo không khí Noel." },
+      { question: "Món ăn truyền thống Giáng Sinh?", answer: "Các nước có món ăn đặc trưng: Gà tây nướng (Mỹ, Anh), bánh khúc cây Bûche de Noël (Pháp), bánh gừng Gingerbread (Đức), bánh Panettone (Ý). Tại Việt Nam, cộng đồng Công giáo thường có tiệc cơm chay hoặc cơm thịt sau lễ, cùng bánh quy, kẹo que." },
+      { question: "12 ngày Giáng Sinh là gì?", answer: "Theo truyền thống Kitô giáo, mùa Giáng Sinh kéo dài từ 25/12 đến 6/1 (Lễ Hiển Linh - ngày 3 vua Đông phương đến thăm Chúa Hài Đồng). Trong 12 ngày này, mọi người tiếp tục ca hát, vui chơi và trao đổi quà tặng." }
+    ]
+  },
+  {
+    id: 'tet-duong-lich',
+    title: 'Tết Dương Lịch',
+    date: getNextDate(1, 1),
+    category: 'Lễ hội',
+    description: 'Chào đón năm mới theo lịch Dương.',
+    fullDescription: 'Ngày 1/1 là ngày đầu tiên của năm mới theo lịch Dương, dịp để mọi người chào đón năm mới với những hy vọng và kế hoạch mới. Đây cũng là ngày nghỉ lễ chính thức.',
+    image: '/images/events/tet-duong-lich.png',
+    qa: [
+      { question: "Nguồn gốc ngày Tết Dương lịch?", answer: "Lịch Dương (Gregorian Calendar) do Giáo hoàng Gregory XIII ban hành năm 1582, thay thế lịch Julius. Ngày 1/1 được chọn làm ngày đầu năm mới. Việt Nam áp dụng lịch Dương từ đầu thế kỷ 20." },
+      { question: "Khác gì với Tết Nguyên Đán?", answer: "Tết Dương lịch (1/1) theo lịch Mặt Trời, ngắn gọn (1 ngày). Tết Nguyên Đán (Âm lịch) theo lịch Mặt Trăng, kéo dài nhiều ngày với nhiều phong tục truyền thống hơn. Tết Dương là quốc tế, Tết Âm mang đậm bản sắc dân tộc." },
+      { question: "Hoạt động đón năm mới?", answer: "Đếm ngược (countdown) 0h, bắn pháo hoa rực rỡ tại các thành phố lớn, tổ chức tiệc, nhạc hội đường phố. Nhiều người đi du lịch, nghỉ dưỡng. Các nhà hàng, khách sạn có chương trình đặc biệt." },
+      { question: "Ý nghĩa của năm mới?", answer: "Thời điểm đánh dấu sự khởi đầu mới, cơ hội để đặt mục tiêu, quyết tâm thay đổi tích cực (New Year's Resolution). Nhiều người viết danh sách ước mơ, kế hoạch cho năm mới, hy vọng một năm thành công và hạnh phúc hơn." }
+    ]
+  },
+  {
+    id: 'ong-tao',
+    title: 'Tết Ông Công Ông Táo',
+    date: '2026-02-10T00:00:00', // 23 Dec Lunar
+    lunarDate: '23/12 Âm lịch',
+    category: 'Văn hóa',
+    description: 'Ngày tiễn Táo Quân về trời báo cáo ngọc hoàng.',
+    fullDescription: 'Theo tín ngưỡng dân gian Việt Nam, Táo Quân là vị thần cai quản bếp núc và đất đai trong nhà. Hàng năm vào ngày 23 tháng Chạp, các Táo sẽ cưỡi cá chép về trời để báo cáo tình hình hạ giới.',
+    image: '/images/events/cung-ong-tao.png',
+    qa: [
+      { question: "Cúng ông Táo cần gì?", answer: "Mâm cúng thường có mũ ông Công ông Táo, cá chép sống (để phóng sinh) hoặc cá chép giấy, mâm cỗ mặn hoặc ngọt, hoa quả, bánh kẹo, và vàng mã. Không thể thiếu là 3 cái mũ giấy để cúng Thần Táo (ông Công, bà Công và chầu bé)." },
+      { question: "Ý nghĩa thả cá chép?", answer: "Cá chép là phương tiện để ông Táo cưỡi về trời báo cáo ngọc hoàng. Theo tín ngưỡng, cá chép tượng trưng cho sự thăng hoa, vượt vũ môn hóa rồng - biểu tượng cho sự may mắn và thành đạt." },
+      { question: "Tại sao phải tiễn ông Táo?", answer: "Ông Táo là vị thần canh giữ bếp núc, theo dõi mọi sinh hoạt trong gia đình suốt năm. Ngày 23 tháng Chạp, các Ngài về trời để báo cáo với Ngọc Hoàng về những việc tốt xấu của gia đình, quyết định vận may cho năm tới." },
+      { question: "Giờ cúng ông Táo khi nào?", answer: "Thường cúng vào buổi trưa hoặc chiều ngày 23 tháng Chạp Âm lịch. Sau khi cúng xong, thả cá chép xuống sông, ao hoặc hồ để ông Táo về trời. Nhiều gia đình chọn giờ Ngọ (11h-13h) vì đây là giờ dương khí mạnh nhất trong ngày." },
+      { question: "Tục lệ đặc biệt nào khác?", answer: "Trước khi cúng, cần lau chùi bếp núc thật sạch sẽ. Sau khi tiễn ông Táo, nhiều gia đình dán giấy đỏ lên bếp với dòng chữ 'Táo Quân về trời' để tránh các thần linh khác quấy nhiễu. Một số nơi còn có tục ăn chay trong ngày này." }
+    ]
+  },
+  {
+    id: 'valentine',
+    title: 'Lễ Tình Nhân (Valentine)',
+    date: getNextDate(2, 14),
+    category: 'Kỷ niệm',
+    description: 'Ngày lễ tôn vinh tình yêu đôi lứa ngọt ngào nhất.',
+    fullDescription: 'Valentine Đỏ (14/2) là ngày lễ tình yêu truyền thống, ngày mà những người yêu nhau bày tỏ tình cảm của mình với nửa còn lại qua các món quà như chocolate, hoa hồng.',
+    image: '/images/events/valentine.png',
+    qa: [
+      { question: "Nguồn gốc Valentine?", answer: "Bắt nguồn từ thánh Valentine, vị giám mục đã hi sinh để bảo vệ tình yêu đôi lứa thời La Mã. Ông bí mật tổ chức hôn lễ cho các cặp đôi mặc dù bị hoàng đế cấm, và bị xử tử ngày 14/2/269." },
+      { question: "Quà tặng phổ biến?", answer: "Hoa hồng đỏ (tượng trưng tình yêu nồng nàn), socola (ngọt ngào như tình yêu), thiệp Valentine, gấu bông, và các món quà handmade thể hiện sự chân thành. Ở Việt Nam, nhiều cặp đôi cũng tặng nhau nhẫn cặp, đồng hồ đôi." },
+      { question: "Valentine ở Việt Nam khác gì?", answer: "Ngoài Valentine đỏ (14/2), giới trẻ Việt còn ăn mừng Valentine trắng (14/3 - ngày nam tặng quà nữ), và ngày 20/10 (Ngày Phụ nữ Việt Nam). Các quán cà phê, nhà hàng thường trang trí lãng mạn và có menu đặc biệt." },
+      { question: "Ý nghĩa màu hoa hồng?", answer: "Hồng đỏ: tình yêu mãnh liệt; Hồng trắng: tình yêu trong sáng, thuần khiết; Hồng vàng: tình bạn, sự quan tâm; Hồng cam: sự hâm mộ, ngưỡng mộ; Hồng hồng: lòng biết ơn, sự ngọt ngào." }
+    ]
+  },
+  {
+    id: 'ram-thang-gieng',
+    title: 'Rằm Tháng Giêng',
+    date: '2026-03-06T00:00:00',
+    lunarDate: '15/1 Âm lịch',
+    category: 'Văn hóa',
+    description: 'Tết Nguyên Tiêu - kết thúc Tết Nguyên Đán.',
+    fullDescription: 'Rằm tháng Giêng hay Tết Nguyên Tiêu là ngày rằm đầu tiên trong năm, đánh dấu sự kết thúc của dịp Tết Nguyên Đán. Đây là ngày người dân đi chùa, thắp đèn cầu may mắn.',
+    image: '/images/events/ram-thang-gieng.png',
+    qa: [
+      { question: "Rằm tháng Giêng có ý nghĩa gì?", answer: "Tết Nguyên Tiêu (Nguyên là đầu, Tiêu là đêm) đánh dấu đêm trăng tròn đầu tiên trong năm mới. Theo phong tục, đây là ngày kết thúc chính thức của Tết, sau đó mọi người bắt đầu công việc bình thường." },
+      { question: "Phong tục ngày Rằm tháng Giêng?", answer: "Đi chùa cầu an, thắp đèn cúng Phật, ăn chay, phóng sanh. Nhiều gia đình tổ chức cỗ rằm, cúng tổ tiên. Trẻ em được rước đèn lồng như Trung Thu thu nhỏ. Một số vùng có hội chợ, trò chơi dân gian." },
+      { question: "Món ăn đặc trưng?", answer: "Chè, bánh trôi bánh chay (miền Bắc), xôi, cơm chay, rau củ luộc. Nhiều người ăn chay trong ngày này để cầu sức khỏe, bình an. Không thể thiếu là hương án với đèn đuốc sáng rực." },
+      { question: "Khác gì với Tết Trung Thu?", answer: "Cả hai đều là đêm rằm, có đèn lồng. Nhưng Rằm tháng Giêng mang tính tâm linh nhiều hơn (đi chùa, cúng bái), còn Trung Thu là ngày hội thiếu nhi với bánh kẹo, múa lân sôi động hơn." }
+    ]
+  },
+  {
+    id: 'quoc-te-phu-nu',
+    title: 'Ngày Quốc Tế Phụ Nữ',
+    date: getNextDate(3, 8),
+    category: 'Kỷ niệm',
+    description: 'Ngày tôn vinh phụ nữ toàn thế giới.',
+    fullDescription: 'Ngày 8/3 là Ngày Quốc tế Phụ nữ, kỷ niệm cuộc đấu tranh của phụ nữ đòi quyền bình đẳng, được tôn trọng và có cơ hội phát triển ngang bằng nam giới.',
+    image: '/images/events/quoc-te-phu-nu.png',
+    qa: [
+      { question: "Nguồn gốc ngày 8/3?", answer: "Ngày 8/3/1857, hàng nghìn nữ công nhân may mặc New York (Mỹ) biểu tình đòi cải thiện điều kiện làm việc và quyền bầu cử. Năm 1910, Clara Zetkin đề xuất ngày 8/3 là Ngày Quốc tế Phụ nữ. LHQ công nhận chính thức năm 1977." },
+      { question: "Ý nghĩa của ngày này?", answer: "Đấu tranh cho quyền bình đẳng giới, chống phân biệt đối xử với phụ nữ. Tôn vinh những thành tựu của phụ nữ trong mọi lĩnh vực: chính trị, kinh tế, văn hóa, xã hội. Nâng cao nhận thức về vai trò và quyền lợi của phụ nữ." },
+      { question: "Khác biệt 8/3 và 20/10?", answer: "8/3 là ngày Quốc tế (toàn cầu), nhấn mạnh quyền bình đẳng giới, đấu tranh xã hội. 20/10 là riêng Việt Nam, tôn vinh phụ nữ Việt trong lịch sử dân tộc. Cả hai đều quan trọng nhưng mang ý nghĩa khác nhau." },
+      { question: "Màu tím có ý nghĩa gì?", answer: "Màu tím (violet) là biểu tượng của Ngày Quốc tế Phụ nữ, tượng trưng cho công lý và phẩm giá. Năm 1908, nữ công nhân may mặc ở Anh mặc áo tím biểu tình. Từ đó màu tím gắn liền với phong trào đấu tranh quyền phụ nữ." },
+      { question: "Việt Nam kỷ niệm như thế nào?", answer: "Tặng hoa (thường là hoa tulip, hồng, mimosa vàng), quà tặng cho phụ nữ. Nhiều nơi tổ chức hội thảo về quyền phụ nữ, bình đẳng giới. Doanh nghiệp cho nhân viên nữ nghỉ nửa ngày hoặc tặng quà. Khuyến khích nam giới chia sẻ việc nhà." }
+    ]
+  },
+  {
+    id: 'gio-to-hung-vuong',
+    title: 'Giỗ Tổ Hùng Vương',
+    date: getNextDate(4, 26),
+    lunarDate: '10/3 Âm lịch',
+    category: 'Lịch sử',
+    description: 'Ngày giỗ Tổ tiên dân tộc Việt Nam.',
+    fullDescription: 'Giỗ Tổ Hùng Vương là ngày tưởng nhớ công đức các vua Hùng - những người có công dựng nước. Đây là dịp để toàn dân tộc tưởng nhớ công ơn tổ tiên, khẳng định bản sắc văn hóa dân tộc.',
+    image: '/images/events/gio-to-hung-vuong.png',
+    qa: [
+      { question: "Vua Hùng là ai?", answer: "Theo sử sách, có 18 đời vua Hùng trị vì nước Văn Lang (2879 TCN - 258 TCN). Các Ngài là con cháu Lạc Long Quân và Âu Cơ, có công dựng nước, dạy dân trồng lúa nước, xây dựng nền văn minh lúa nước Việt Nam." },
+      { question: "Lễ hội diễn ra ở đâu?", answer: "Đền Hùng tại Phú Thọ (Việt Trì) là nơi diễn ra lễ hội chính. Hàng triệu người từ khắp nơi về dự lễ dâng hương, tham gia các hoạt động văn hóa, thể thao truyền thống như hát xoan, đánh cờ người, trai gái ném còn." },
+      { question: "Hoạt động trong ngày Giỗ Tổ?", answer: "Lễ dâng hương trang trọng tại Đền Hùng do lãnh đạo Đảng, Nhà nước chủ trì. Diễu hành, biểu diễn văn nghệ, tái hiện lễ hội truyền thống, tổ chức các trò chơi dân gian. Nhiều gia đình cũng tổ chức lễ tưởng nhớ tại nhà." },
+      { question: "Ý nghĩa của ngày Giỗ Tổ?", answer: "Khẳng định đạo lý 'Uống nước nhớ nguồn', tôn vinh cội nguồn dân tộc. Đây là dịp để mọi người Việt Nam, dù ở đâu, đều hướng về cội nguồn, tự hào về truyền thống lịch sử hàng nghìn năm văn hiến." },
+      { question: "Truyền thuyết Bánh chưng bánh dày?", answer: "Vua Hùng muốn truyền ngôi, yêu cầu các con tìm món ăn quý hiếm dâng cúng tổ tiên. Lang Liêu (con thứ 18) nghèo, được thần dạy làm bánh chưng (Đất - vuông), bánh dày (Trời - tròn) từ lúa gạo bình dị. Vua Hùng chọn Liêu vì hiểu được ý nghĩa 'trời tròn đất vuông' và giá trị của lao động." },
+      { question: "Ngày Giỗ Tổ có nghỉ không?", answer: "Từ năm 2007, Giỗ Tổ Hùng Vương (10/3 Âm lịch) trở thành ngày nghỉ lễ chính thức của Việt Nam, thường rơi vào cuối tháng 4 Dương lịch. Đây là ngày toàn dân được nghỉ để tưởng nhớ công ơn tổ tiên." }
+    ]
+  },
+  {
+    id: '30-4',
+    title: 'Giải Phóng Miền Nam',
+    date: getNextDate(4, 30),
+    lunarDate: '',
+    category: 'Lịch sử',
+    description: 'Kỷ niệm ngày đất nước hoàn toàn thống nhất.',
+    fullDescription: 'Ngày 30/4/1975 là mốc son chói lọi trong lịch sử dân tộc Việt Nam, đánh dấu sự thắng lợi hoàn toàn của cuộc kháng chiến chống Mỹ, thống nhất đất nước.',
+    image: '/images/events/30-thang-4.png',
+    qa: [
+      { question: "Sự kiện lịch sử chính?", answer: "Xe tăng 843 và 390 của Quân đội Nhân dân Việt Nam húc đổ cổng Dinh Độc Lập (nay là Dinh Thống Nhất) vào 11h30 ngày 30/4/1975, đánh dấu chấm dứt 21 năm chiến tranh ở miền Nam." },
+      { question: "Ý nghĩa của ngày 30/4?", answer: "Ngày này đánh dấu sự kết thúc hoàn toàn cuộc kháng chiến chống Mỹ cứu nước, thống nhất đất nước sau gần 30 năm chia cắt. Đây là mốc son chói lọi, khẳng định ý chí độc lập tự do của dân tộc Việt Nam." },
+      { question: "Hoạt động kỷ niệm?", answer: "Toàn quốc tổ chức lễ thượng cờ, dâng hoa tại các nghĩa trang liệt sĩ, tổ chức gặp mặt thương binh, gia đình liệt sĩ. Nhiều địa phương có diễu hành, bắn pháo hoa và các hoạt động văn hóa - thể thao." },
+      { question: "Chiến dịch Hồ Chí Minh là gì?", answer: "Chiến dịch Hồ Chí Minh (26/4 - 30/4/1975) là chiến dịch quân sự lớn nhất trong lịch sử kháng chiến chống Mỹ, với hơn 20 vạn quân tham gia, giải phóng hoàn toàn Sài Gòn - thành phố lớn nhất miền Nam." },
+      { question: "Ngày 30/4 có nghỉ không?", answer: "Đây là ngày nghỉ lễ chính thức của Việt Nam. Thường được nghỉ liên tục với ngày 1/5 (Ngày Quốc tế Lao động), tạo thành kỳ nghỉ lễ dài ngày cho người lao động." }
+    ]
+  },
+  {
+    id: 'quoc-te-lao-dong',
+    title: 'Ngày Quốc Tế Lao Động',
+    date: getNextDate(5, 1),
+    category: 'Lễ hội',
+    description: 'Ngày tôn vinh người lao động toàn thế giới.',
+    fullDescription: 'Ngày 1/5 là ngày Quốc tế Lao động, kỷ niệm cuộc đấu tranh của công nhân Chicago (Mỹ) năm 1886 đòi quyền lợi chính đáng. Đây là ngày nghỉ lễ để tôn vinh người lao động.',
+    image: '/images/events/quoc-te-lao-dong.png',
+    qa: [
+      { question: "Lịch sử ngày 1/5?", answer: "Ngày 1/5/1886, hơn 300.000 công nhân Chicago (Mỹ) đình công đòi làm việc 8 giờ/ngày. Cuộc đấu tranh này đã hy sinh nhiều người nhưng đạt được quyền lợi. Từ năm 1890, ngày 1/5 được công nhận là Ngày Quốc tế Lao động." },
+      { question: "Ý nghĩa của ngày này?", answer: "Tôn vinh những đóng góp to lớn của giai cấp công nhân và người lao động đối với sự phát triển xã hội. Khẳng định quyền lợi chính đáng: 8 giờ làm việc, 8 giờ nghỉ ngơi, 8 giờ vui chơi. Thúc đẩy công bằng xã hội và quyền lợi người lao động." },
+      { question: "Việt Nam kỷ niệm như thế nào?", answer: "Ngày nghỉ lễ chính thức, thường nghỉ liên tục với 30/4. Nhiều doanh nghiệp tổ chức du lịch, dã ngoại cho người lao động. Khen thưởng công nhân, lao động tiêu biểu. Một số nơi tổ chức gặp mặt, văn nghệ, thể thao." },
+      { question: "8 giờ làm việc có từ khi nào?", answer: "Sau cuộc đấu tranh năm 1886, nhiều quốc gia dần áp dụng chế độ 8 giờ làm việc. Tại Việt Nam, Bộ luật Lao động quy định rõ giờ làm việc, nghỉ ngơi, bảo vệ quyền lợi người lao động theo chuẩn quốc tế." },
+      { question: "Các quốc gia khác kỷ niệm sao?", answer: "Hơn 80 quốc gia nghỉ lễ 1/5. Ở châu Âu có diễu hành, biểu tình ôn hòa. Ở Nga có lễ diễu binh lớn. Mỹ lại kỷ niệm Ngày Lao động vào thứ Hai đầu tháng 9. Mỗi nước có cách riêng nhưng đều tôn vinh người lao động." }
+    ]
+  },
+  {
+    id: 'phat-dan',
+    title: 'Phật Đản',
+    date: getNextDate(6, 2),
+    lunarDate: '15/4 Âm lịch',
+    category: 'Tôn giáo',
+    description: 'Lễ kỷ niệm Đức Phật Thích Ca ra đời.',
+    fullDescription: 'Phật Đản (Vesak) là ngày lễ quan trọng nhất của Phật giáo, kỷ niệm ngày Đức Phật Thích Ca Mâu Ni ra đời, đắc đạo và nhập Niết Bàn.',
+    image: '/images/events/phat-dan.png',
+    qa: [
+      { question: "Phật Đản kỷ niệm điều gì?", answer: "Ngày 15/4 Âm lịch kỷ niệm 3 sự kiện trọng đại: Đức Phật sinh ra tại vườn Lâm Tỳ Ni (Nepal), đắc đạo dưới cây Bồ Đề (Ấn Độ), và nhập Niết Bàn ở tuổi 80. UNESCO công nhận là Ngày Vesak Quốc tế." },
+      { question: "Phong tục lễ Phật Đản?", answer: "Đi chùa, tắm Phật (tưới nước lên tượng Phật Thích Ca), rước Phật, thắp đèn hoa đăng, buông phóng sinh. Chùa chiền trang hoàng rực rỡ với cờ phướn, đèn lồng ngũ sắc. Phật tử ăn chay, nghe thuyết pháp, hành thiền." },
+      { question: "Tắm Phật có ý nghĩa gì?", answer: "Tưới nước hoa lên tượng Phật Thích Ca để tượng trưng rửa sạch bụi bặm phiền não, thanh tịnh thân tâm. Theo truyền thuyết, khi Đức Phật ra đời, có 9 con rồng phun nước thơm tắm cho Ngài." },
+      { question: "Hoạt động tại chùa?", answer: "Lễ tắm Phật long trọng, rước Phật diễu hành, thả đèn hoa đăng, phóng sinh, ăn chay miễn phí cho Phật tử. Nhiều chùa tổ chức trại thiền, giảng pháp, triển lãm tranh ảnh Phật giáo, văn nghệ tâm linh." },
+      { question: "Phật Đản có nghỉ không?", answer: "Phật Đản (15/4 Âm lịch) là ngày nghỉ lễ chính thức tại Việt Nam từ năm 2007, thường rơi vào tháng 5-6 Dương lịch. Đây là ngày quan trọng với cộng đồng Phật tử (chiếm khoảng 12% dân số VN)." }
+    ]
+  },
+  {
+    id: 'thuong-binh-liet-si',
+    title: 'Ngày Thương Binh Liệt Sĩ',
+    date: getNextDate(7, 27),
+    category: 'Lịch sử',
+    description: 'Tưởng nhớ công ơn các anh hùng liệt sĩ.',
+    fullDescription: 'Ngày 27/7 là ngày để toàn dân tưởng nhớ, tri ân các anh hùng liệt sĩ, thương binh đã hy sinh và cống hiến cho độc lập tự do của Tổ quốc.',
+    image: '/images/events/thuong-binh-liet-si.png',
+    qa: [
+      { question: "Nguồn gốc ngày 27/7?", answer: "Ngày 27/7/1947, Chủ tịch Hồ Chí Minh ký sắc lệnh 179 về chính sách ưu đãi gia đình liệt sĩ, thương binh. Từ năm 1994, ngày 27/7 chính thức trở thành Ngày Thương binh - Liệt sĩ toàn quốc." },
+      { question: "Ý nghĩa của ngày này?", answer: "Tưởng nhớ và tri ân hơn 1,3 triệu liệt sĩ đã hy sinh vì độc lập dân tộc. Động viên, chăm sóc thương binh, bệnh binh, gia đình liệt sĩ. Giáo dục truyền thống yêu nước, lòng biết ơn cho thế hệ trẻ." },
+      { question: "Hoạt động trong ngày 27/7?", answer: "Lễ dâng hương, dâng hoa tại Nghĩa trang liệt sĩ, Đài tưởng niệm. Thắp nến tri ân, phút mặc niệm. Tổ chức gặp mặt, trao quà cho gia đình liệt sĩ, thương binh. Nhiều nơi có triển lãm ảnh, tư liệu lịch sử." },
+      { question: "Ai được xem là liệt sĩ?", answer: "Những người hy sinh trong chiến đấu bảo vệ Tổ quốc, làm nhiệm vụ quốc phòng, an ninh. Bao gồm: bộ đội, công an, dân quân, thanh niên xung phong, cán bộ đảng chính quyền hy sinh trong kháng chiến." },
+      { question: "Chính sách với gia đình liệt sĩ?", answer: "Nhà nước có chính sách trợ cấp hàng tháng, hỗ trợ xây nhà, cấp đất, ưu tiên việc làm cho con em. Thương binh được điều trị miễn phí, cấp xe lăn, dụng cụ trợ giúp. Xã hội luôn tri ân, tôn vinh đóng góp của họ." }
+    ]
+  },
+  {
+    id: 'vu-lan',
+    title: 'Lễ Vu Lan',
+    date: getNextDate(8, 24),
+    lunarDate: '15/7 Âm lịch',
+    category: 'Tôn giáo',
+    description: 'Lễ báo hiếu, tri ân công ơn cha mẹ.',
+    fullDescription: 'Vu Lan (Ullambana) là lễ hội lớn thứ hai của Phật giáo, vừa có ý nghĩa tâm linh (cứu độ vong linh), vừa mang tính nhân văn sâu sắc về lòng hiếu thảo với cha mẹ.',
+    image: '/images/events/vu-lan.png',
+    qa: [
+      { question: "Vu Lan có nghĩa là gì?", answer: "Vu Lan (tiếng Phạn: Ullambana) nghĩa là 'cứu đảo huyền' - giải cứu những người đang chịu khổ đau. Theo kinh Phật, đây là ngày đệ tử Mục Kiền Liên cứu mẹ thoát khỏi cảnh đói khổ trong địa ngục nhờ công đức cúng dưỡng chư Tăng." },
+      { question: "Phong tục lễ Vu Lan?", answer: "Đeo hoa hồng (đỏ: mẹ còn sống, trắng: mẹ đã mất) trên áo để tỏ lòng hiếu thảo. Đi chùa cầu siêu cho tổ tiên, ông bà. Cúng dưỡng chư Tăng, phóng sinh, bố thí. Con cái về thăm cha mẹ, tặng quà, bày tỏ tình cảm." },
+      { question: "Ý nghĩa hoa hồng Vu Lan?", answer: "Hoa hồng đỏ cài áo: cha mẹ còn sống, thể hiện lòng biết ơn. Hoa hồng trắng: cha mẹ đã khuất, tưởng nhớ công ơn sinh thành dưỡng dục. Tục này bắt đầu từ đầu thế kỷ 20, trở thành nét đẹp văn hóa Việt Nam." },
+      { question: "Hoạt động tại chùa?", answer: "Lễ Vu Lan báo hiếu long trọng, cầu siêu cho vong linh, cúng dưỡng Tăng Ni. Nhiều chùa tổ chức 'bông hồng cài áo', cho Phật tử bày tỏ lòng hiếu thảo. Thuyết giảng về đạo hiếu, phóng sinh, ăn chay." },
+      { question: "Khác gì với Ngày của Mẹ?", answer: "Vu Lan mang tính tâm linh (Phật giáo), tri ân cả cha lẫn mẹ, tổ tiên. Ngày của Mẹ (Mother's Day) mang tính thế tục, chỉ tôn vinh mẹ. Ở Việt Nam, Vu Lan gắn sâu với văn hóa báo hiếu truyền thống." }
+    ]
+  },
+  {
+    id: 'quoc-khanh',
+    title: 'Quốc Khánh Việt Nam',
+    date: getNextDate(9, 2),
+    lunarDate: '',
+    category: 'Lễ hội',
+    description: 'Ngày khai sinh ra nước Việt Nam Dân chủ Cộng hòa.',
+    fullDescription: 'Ngày 2/9/1945, tại Quảng trường Ba Đình, Chủ tịch Hồ Chí Minh đã đọc bản Tuyên ngôn Độc lập.',
+    image: '/images/events/quoc-khanh.png',
+    qa: [
+      { question: "Hoạt động thường niên?", answer: "Lễ thượng cờ trang trọng tại Quảng trường Ba Đình, bắn 21 phát đại bác chào mừng, diễu binh (vào các dịp đặc biệt), bắn pháo hoa rực rỡ tại các thành phố lớn, và tổ chức nhiều chương trình văn nghệ, thể thao." },
+      { question: "Tuyên ngôn Độc lập có gì đặc biệt?", answer: "Bản Tuyên ngôn do Chủ tịch Hồ Chí Minh đọc tại Quảng trường Ba Đình ngày 2/9/1945 trước hơn 50 vạn đồng bào. Bản văn khẳng định quyền được sống, tự do và hạnh phúc của dân tộc Việt Nam, dẫn chiếu Tuyên ngôn Độc lập Mỹ 1776 và Tuyên ngôn Nhân quyền Pháp 1791." },
+      { question: "Quốc kỳ Việt Nam có ý nghĩa gì?", answer: "Lá cờ đỏ sao vàng: nền đỏ tượng trưng cho máu đào của các anh hùng liệt sĩ; ngôi sao vàng 5 cánh đại diện cho liên minh công nhân, nông dân, trí thức, thanh niên và chiến sĩ - 5 giai cấp đoàn kết xây dựng đất nước." },
+      { question: "Lịch sử trước Quốc khánh?", answer: "Trước 2/9/1945, Việt Nam trải qua gần 80 năm bị thực dân Pháp đô hộ (1858-1945), và 5 năm bị phát xít Nhật chiếm đóng (1940-1945). Cách mạng tháng Tám thành công đã lật đổ chính quyền phong kiến và đế quốc, mở ra kỷ nguyên độc lập mới." },
+      { question: "Diễu binh có thường xuyên không?", answer: "Diễu binh lớn chỉ tổ chức vào các dịp kỷ niệm đặc biệt (10 năm, 20 năm...). Lần gần nhất là năm 2015 (70 năm Quốc khánh) và 2020 (45 năm giải phóng miền Nam). Các năm thường chỉ tổ chức lễ kỷ niệm trang trọng." }
+    ]
+  },
+  {
+    id: 'tet-trung-thu',
+    title: 'Tết Trung Thu',
+    date: getNextDate(9, 25),
+    lunarDate: '15/8 Âm lịch',
+    category: 'Văn hóa',
+    description: 'Ngày hội của thiếu nhi và đoàn viên.',
+    fullDescription: 'Tết Trung Thu là một trong những lễ hội truyền thống quan trọng của Việt Nam, diễn ra vào rằm tháng 8 âm lịch. Đây là dịp để trẻ em vui chơi với đèn lồng, bánh trung thu, và các hoạt động múa lân sư rồng.',
+    image: '/images/events/trung-thu.png',
+    qa: [
+      { question: "Nguồn gốc Tết Trung Thu?", answer: "Có nguồn gốc từ Trung Quốc cổ đại, lễ hội tôn vinh mặt trăng và mùa màng bội thu. Tại Việt Nam, Trung Thu trở thành ngày hội của trẻ em, với ý nghĩa sum họp gia đình dưới ánh trăng rằm tròn đầy nhất trong năm." },
+      { question: "Trẻ em làm gì vào Trung Thu?", answer: "Rước đèn lồng (đèn ông sao, đèn con cá, đèn ngôi sao), xem múa lân, phá cỗ (ăn bánh trung thu, hoa quả), nghe kể chuyện Chú Cuội, Chị Hằng. Các em thường được tặng đèn lồng, mặt nạ, đồ chơi và ăn nhiều bánh kẹo." },
+      { question: "Bánh trung thu có những loại nào?", answer: "Bánh nướng: nhân thập cẩm, đậu xanh, sen, trà xanh, thịt quay. Bánh dẻo: nhân đậu xanh, khoai môn, trà xanh. Bánh pía, bánh Bông Lan Trung Thu. Gần đây có thêm bánh kem, bánh tiramisu, socola phong cách hiện đại." },
+      { question: "Ý nghĩa của trăng rằm?", answer: "Mặt trăng rằm tháng 8 tròn đầy nhất trong năm, biểu tượng cho sự đoàn viên, sum họp. Theo truyền thuyết dân gian Việt Nam, đây là đêm Chú Cuội ngồi dưới gốc cây đa trên Mặt Trăng, còn Chị Hằng ở cung Quảng Hàn." },
+      { question: "Múa lân có ý nghĩa gì?", answer: "Lân sư rồng trong Trung Thu mang ý nghĩa xua đuổi tà ma, mang lại may mắn. Đội lân thường múa tại các nhà, cửa hàng để chúc phúc. Trẻ em rất thích xem lân múa và nhận lì xì từ chủ nhà." },
+      { question: "Tục lệ cổ truyền khác?", answer: "Dựng cỗ Trung Thu (5 loại quả tươi), làm đèn ông sao, trồng cây nêu, tổ chức hội thi hóa trang, ca hát. Ở một số vùng nông thôn vẫn giữ tục đánh đèn cù, kéo co, bắt vịt, leo cột mỡ." }
+    ]
+  },
+  {
+    id: 'phu-nu-vn',
+    title: 'Ngày Phụ Nữ Việt Nam',
+    date: getNextDate(10, 20),
+    category: 'Kỷ niệm',
+    description: 'Ngày tôn vinh phụ nữ Việt Nam.',
+    fullDescription: 'Ngày 20/10 là ngày kỷ niệm thành lập Hội Liên hiệp Phụ nữ Việt Nam (1930), tôn vinh vai trò, đóng góp to lớn của phụ nữ Việt Nam trong gia đình và xã hội.',
+    image: '/images/events/phu-nu-vn.png',
+    qa: [
+      { question: "Nguồn gốc ngày 20/10?", answer: "Ngày 20/10/1930, Hội Liên hiệp Phụ nữ Việt Nam tiền thân được thành lập, đánh dấu bước phát triển của phong trào phụ nữ Việt Nam. Từ năm 1930, ngày này trở thành ngày kỷ niệm chính thức để tôn vinh phụ nữ." },
+      { question: "Khác gì với ngày 8/3?", answer: "Ngày 8/3 là Quốc tế Phụ nữ (toàn thế giới), nhấn mạnh quyền bình đẳng giới. Ngày 20/10 là riêng của Việt Nam, tôn vinh những đóng góp đặc biệt của phụ nữ Việt trong lịch sử dân tộc, từ kháng chiến đến xây dựng đất nước." },
+      { question: "Hoạt động trong ngày 20/10?", answer: "Tặng hoa, quà cho phụ nữ trong gia đình và cơ quan. Nhiều đơn vị tổ chức gặp mặt, văn nghệ, trao giải thưởng cho phụ nữ tiêu biểu. Nam giới thường đảm nhận việc nhà, nấu ăn để phụ nữ được nghỉ ngơi." },
+      { question: "Hoa tặng phổ biến?", answer: "Hoa hồng (tình yêu, tôn trọng), hoa lan (sang trọng, quý phái), hoa cẩm chướng (tình mẫu tử), hoa tulip (vẻ đẹp hoàn hảo), hoa ly (thuần khiết). Nhiều người cũng tặng giỏ quà, voucher spa, mỹ phẩm." },
+      { question: "Phụ nữ Việt Nam có gì đặc biệt?", answer: "Phụ nữ Việt nổi tiếng với tinh thần 'Anh hùng, bất khuất, trung hậu, đảm đang'. Trong lịch sử có nhiều nữ tướng như Hai Bà Trưng, Bà Triệu, Trần Thị Lý. Ngày nay, phụ nữ Việt vừa đảm đang trong gia đình, vừa thành công trong sự nghiệp." }
+    ]
+  },
+  {
+    id: 'nha-giao',
+    title: 'Ngày Nhà Giáo Việt Nam',
+    date: getNextDate(11, 20),
+    category: 'Kỷ niệm',
+    description: 'Ngày tôn vinh các thầy cô giáo.',
+    fullDescription: 'Ngày 20/11 là ngày tôn vinh nghề dạy học, tri ân các thầy cô giáo - những người làm công tác trồng người cao quý.',
+    image: '/images/events/nha-giao-viet-nam.png',
+    qa: [
+      { question: "Nguồn gốc ngày 20/11?", answer: "Ngày 20/11/1958, Hội nghị Công đoàn ngành Giáo dục lần đầu tiên họp tại Hà Nội. Từ năm 1982, ngày 20/11 chính thức được chọn là Ngày Nhà giáo Việt Nam để tôn vinh thầy cô." },
+      { question: "Ý nghĩa của ngày này?", answer: "Tri ân công lao to lớn của nhà giáo trong sự nghiệp trồng người, giáo dục thế hệ trẻ. Tôn vinh nghề dạy học cao quý. Động viên, khích lệ tinh thần các thầy cô giáo. Giáo dục học sinh về lòng biết ơn, tôn sư trọng đạo." },
+      { question: "Học sinh làm gì trong ngày 20/11?", answer: "Tặng hoa, thiệp, quà cho thầy cô. Tổ chức văn nghệ, sinh hoạt lớp tri ân. Viết thư, bài thơ bày tỏ tình cảm. Cựu học sinh về thăm trường, gặp lại thầy cô. Nhiều nơi tổ chức gặp mặt, tọa đàm." },
+      { question: "Hoa tặng thầy cô?", answer: "Hoa cúc (daisy) trắng: sự trong sáng, tôn kính. Hoa hồng: tình yêu thương, biết ơn. Hoa ly: lòng thuần khiết, trân trọng. Hoa cẩm chướng: sự kính trọng. Hoa hướng dương: niềm vui, lòng biết ơn rạng rỡ." },
+      { question: "Giáo viên có nghỉ không?", answer: "Ngày 20/11 không phải ngày nghỉ chính thức. Các trường thường tổ chức lễ kỷ niệm vào buổi sáng, sau đó nghỉ hoặc sinh hoạt nhẹ nhàng. Nhiều địa phương tổ chức gặp mặt, vinh danh giáo viên tiêu biểu." }
+    ]
+  }
+];
+
+export const FOODS: Food[] = [
+  {
+    id: 'banh-chung',
+    name: 'Bánh Chưng',
+    description: 'Linh hồn của Tết cổ truyền Bắc Bộ.',
+    details: 'Bánh chưng hình vuông, tượng trưng cho Đất, được làm từ gạo nếp, đậu xanh, thịt lợn và gói bằng lá dong.',
+    image: 'https://picsum.photos/seed/banhchung/400/300'
+  },
+  {
+    id: 'thit-kho',
+    name: 'Thịt Kho Hột Vịt',
+    description: 'Món ăn không thể thiếu ở miền Nam.',
+    details: 'Thịt heo kho rục với nước dừa và trứng vịt, mang ý nghĩa vạn sự vuông tròn, êm đẹp.',
+    image: 'https://picsum.photos/seed/thitkho/400/300'
+  },
+  {
+    id: 'nem-ran',
+    name: 'Nem Rán (Chả Giò)',
+    description: 'Giòn rụm, đậm đà hương vị Việt.',
+    details: 'Món ăn tinh tế kết hợp giữa thịt băm, mộc nhĩ, miến, trứng và các loại gia vị, được chiên giòn.',
+    image: 'https://picsum.photos/seed/springroll/400/300'
+  },
+  {
+    id: 'mut-tet',
+    name: 'Khay Mứt Tết',
+    description: 'Ngọt ngào hương vị sum vầy.',
+    details: 'Khay mứt với nhiều loại như mứt dừa, mứt gừng, hạt dưa... tượng trưng cho sự sum họp, ngọt ngào.',
+    image: 'https://picsum.photos/seed/jam/400/300'
+  }
+];
