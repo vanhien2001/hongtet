@@ -202,8 +202,8 @@ const App: React.FC = () => {
       />
 
       <footer className="text-center py-8 px-4">
-        <p className="text-gray-400 text-sm mb-2">© 2025 Hóng Tết. Made with ❤️ for Vietnam.</p>
-        <p className="text-gray-400 text-xs">
+        <p className="text-gray-600 text-sm mb-2">© 2025 Hóng Tết. Made with ❤️ for Vietnam.</p>
+        <p className="text-gray-600 text-xs">
           Thời gian hiển thị theo múi giờ Việt Nam (GMT+7)
         </p>
       </footer>

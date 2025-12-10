@@ -16,7 +16,7 @@ const AccordionItem: React.FC<{ qa: QnA; isOpen: boolean; onClick: () => void }>
       <span className={`font-semibold text-lg transition-colors ${isOpen ? 'text-tetRed' : 'text-gray-800 group-hover:text-tetRed'}`}>
         {qa.question}
       </span>
-      <span className={`transform transition-transform duration-300 text-gray-400 ${isOpen ? 'rotate-180' : ''}`}>
+      <span className={`transform transition-transform duration-300 text-gray-600 ${isOpen ? 'rotate-180' : ''}`}>
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
       </span>
     </button>
@@ -78,7 +78,7 @@ const EventModal: React.FC<EventModalProps> = ({ event, onClose }) => {
           </p>
 
           <div className="mb-6">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Thông tin chi tiết</h3>
+            <h3 className="text-xs font-bold text-gray-600 uppercase tracking-widest mb-4">Thông tin chi tiết</h3>
             {event.qa.map((item, idx) => (
               <AccordionItem 
                 key={idx} 
