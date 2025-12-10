@@ -9,32 +9,33 @@ const TetQA: React.FC = () => {
   };
 
   return (
-    <div className="relative py-20 overflow-hidden bg-gray-50">
+    <div className="relative py-24 overflow-hidden bg-gradient-to-b from-yellow-50/90 via-orange-50/70 to-red-50/80">
       {/* Subtle Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-orange-50/30 to-gray-50"></div>
-      <div className="absolute inset-0 opacity-50">
-        <div className="absolute top-20 right-1/4 w-96 h-96 bg-tetRed/8 rounded-full filter blur-3xl"></div>
-        <div className="absolute bottom-20 left-1/4 w-96 h-96 bg-orange-200/20 rounded-full filter blur-3xl"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-red-100/30 via-orange-100/20 to-yellow-100/30"></div>
+      <div className="absolute inset-0">
+        <div className="absolute top-20 right-1/4 w-[500px] h-[500px] bg-red-300/20 rounded-full filter blur-3xl animate-blob"></div>
+        <div className="absolute bottom-20 left-1/4 w-[500px] h-[500px] bg-yellow-300/20 rounded-full filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-orange-300/15 rounded-full filter blur-3xl animate-blob animation-delay-4000"></div>
       </div>
 
       <div className="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-block mb-4">
-            <span className="px-6 py-2 bg-white rounded-full text-tetRed font-semibold text-sm border-2 border-tetRed/20 shadow-sm">
+          <div className="inline-block mb-6">
+            <span className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-orange-500 rounded-full text-white font-bold text-sm border-2 border-white shadow-lg">
               ĐẶC BIỆT
             </span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-serif font-bold text-gray-900 mb-5">
             Tìm Hiểu Về Tết Nguyên Đán
           </h2>
-          <p className="text-gray-700 text-lg max-w-2xl mx-auto font-medium">
+          <p className="text-gray-800 text-lg md:text-xl max-w-2xl mx-auto font-semibold">
             Khám phá những điều thú vị về dịp lễ lớn nhất trong năm của người Việt
           </p>
         </div>
 
         {/* Q&A Grid */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 items-start">
           {TET_QA.map((qa, index) => (
             <div
               key={index}
